@@ -5,8 +5,16 @@ import pandas as pd
 import streamlit as st
 
 from agent import check_slide_claim, DEFAULT_MODEL
-from export import build_report
+from export import build_report, EXPORT_BUILD
 from pptx_ingest import extract_deck
+
+EXPECTED_EXPORT_BUILD = "2026.08.02.2"
+if EXPORT_BUILD != EXPECTED_EXPORT_BUILD:
+    st.error(
+        "The app files are from different packages. Replace both app.py and export.py "
+        "with the files from the same hotfix ZIP, commit them together, and reboot the app."
+    )
+    st.stop()
 
 st.set_page_config(page_title="Slide QA Copilot", page_icon="🖥️", layout="wide")
 st.title("🖥️ Slide QA Copilot")
