@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import io
+import json
+import re
 from collections import Counter
 from typing import Any
 
@@ -17,12 +19,28 @@ WRAP = Alignment(vertical="top", wrap_text=True)
 THIN = Side(style="thin", color="E5E7EB")
 BORDER = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
 
+# Excel worksheets are XML files. Source pages and model verbatims can contain
+# invisible control characters that are valid in Python strings but illegal in
+# Excel XML. Remove only those forbidden characters before writing cells.
+ILLEGAL_EXCEL_CHARACTERS_RE = re.compile(r"[\x00-\x08\x0B\x0C\x0E-\x1F\uFFFE\uFFFF]")
+EXCEL_CELL_TEXT_LIMIT = 32767
+
 
 def _clean(value: Any) -> Any:
     if value is None:
         return ""
-    if isinstance(value, float) and pd.isna(value):
-        return ""
+    try:
+        if pd.isna(value):
+            return ""
+    except (TypeError, ValueError):
+        pass
+
+    if isinstance(value, (dict, list, tuple, set)):
+        value = json.dumps(value, ensure_ascii=False, default=str)
+
+    if isinstance(value, str):
+        value = ILLEGAL_EXCEL_CHARACTERS_RE.sub("", value)
+        return value[:EXCEL_CELL_TEXT_LIMIT]
     return value
 
 

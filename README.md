@@ -31,3 +31,7 @@ streamlit run app.py
 ## Data handling
 
 This is an internal beta. Use only content approved for external AI processing. Where practical, remove client names, logos, comments, and unnecessary confidential identifiers before upload. Final QA decisions remain with the analyst.
+
+## Excel export safeguard
+
+The workbook exporter removes invisible control characters that may be returned from PDFs or source pages before writing text to XLSX. This prevents `openpyxl.IllegalCharacterError` while preserving readable content.

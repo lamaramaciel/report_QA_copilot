@@ -183,9 +183,19 @@ def extract_from_pptx(data: bytes) -> pd.DataFrame:
                     ))
 
             if getattr(shape, "has_table", False):
-                for r_idx, row in enumerate(shape.table.rows, start=1):
+                table = shape.table
+                header_values = [str(cell.text or "").strip() for cell in table.rows[0].cells] if len(table.rows) else []
+                for r_idx, row in enumerate(table.rows, start=1):
+                    row_values = [str(cell.text or "").strip() for cell in row.cells]
+                    row_context = " | ".join(value for value in row_values if value)
                     for c_idx, cell in enumerate(row.cells, start=1):
-                        surrounding = str(cell.text or "").strip()
+                        column_header = header_values[c_idx - 1] if c_idx - 1 < len(header_values) else ""
+                        context_parts = []
+                        if column_header:
+                            context_parts.append(f"Table column: {column_header}")
+                        if row_context:
+                            context_parts.append(f"Table row: {row_context}")
+                        surrounding = "\n".join(context_parts) or str(cell.text or "").strip()
                         for p_idx, paragraph in enumerate(cell.text_frame.paragraphs):
                             rows.extend(_paragraph_records(
                                 paragraph=paragraph,

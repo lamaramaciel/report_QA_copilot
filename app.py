@@ -265,12 +265,19 @@ if st.session_state.slide_results:
                 if url.strip():
                     st.markdown(f"- [{url.strip()}]({url.strip()})")
 
-    report_bytes = build_report(results)
-    st.download_button(
-        "⬇️ Download QA workbook (.xlsx)",
-        report_bytes,
-        file_name="Slide_QA_Review.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        use_container_width=True,
-        help="Includes the full review results, source retrieval details, and API usage information for the pilot.",
-    )
+    try:
+        report_bytes = build_report(results)
+        st.download_button(
+            "⬇️ Download QA workbook (.xlsx)",
+            report_bytes,
+            file_name="Slide_QA_Review.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True,
+            help="Includes the full review results, source retrieval details, and API usage information for the pilot.",
+        )
+    except Exception as exc:
+        st.error(
+            "The review completed, but the Excel workbook could not be generated. "
+            "Reset the results and rerun after updating the app files. "
+            f"Technical detail: {type(exc).__name__}."
+        )
